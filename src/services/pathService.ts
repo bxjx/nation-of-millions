@@ -1,35 +1,39 @@
-import type { NationBuilderClient } from './nationbuilder.js';
+import type { HTTPNationBuilderClient } from './httpClient.js';
 import type { PathJourney, Path } from '../types/index.js';
 
 export class PathService {
-  constructor(private client: NationBuilderClient) {}
+  constructor(private client: HTTPNationBuilderClient) {}
 
   async getAllPathJourneys(pathId: string): Promise<PathJourney[]> {
     const allJourneys: PathJourney[] = [];
     let page = 1;
     const perPage = 100;
-    
+
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const journeys = await this.client.getPathJourneys(pathId, page, perPage);
-      
+
       if (journeys.length === 0) {
         break;
       }
-      
+
       allJourneys.push(...journeys);
-      
+
       // If we got less than perPage, we're on the last page
       if (journeys.length < perPage) {
         break;
       }
-      
+
       page++;
     }
-    
+
     return allJourneys;
   }
 
-  async getPathJourneysSample(pathId: string, limit = 10): Promise<PathJourney[]> {
+  async getPathJourneysSample(
+    pathId: string,
+    limit = 10
+  ): Promise<PathJourney[]> {
     const journeys = await this.client.getPathJourneys(pathId, 1, limit);
     return journeys;
   }
@@ -39,7 +43,10 @@ export class PathService {
     return new Set(journeys.map(journey => journey.person_id));
   }
 
-  async getPersonIdsOnPathSample(pathId: string, limit = 10): Promise<Set<string>> {
+  async getPersonIdsOnPathSample(
+    pathId: string,
+    limit = 10
+  ): Promise<Set<string>> {
     const journeys = await this.getPathJourneysSample(pathId, limit);
     return new Set(journeys.map(journey => journey.person_id));
   }

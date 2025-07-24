@@ -8,11 +8,19 @@ export class NationBuilderClient {
     this.httpClient = new HTTPNationBuilderClient(config);
   }
 
-  async getPeopleWithTag(tag: string, page = 1, perPage = 100): Promise<Person[]> {
+  async getPeopleWithTag(
+    tag: string,
+    page = 1,
+    perPage = 100
+  ): Promise<Person[]> {
     return await this.httpClient.getPeopleWithTag(tag, page, perPage);
   }
 
-  async getPathJourneys(pathId: string, page = 1, perPage = 100): Promise<PathJourney[]> {
+  async getPathJourneys(
+    pathId: string,
+    page = 1,
+    perPage = 100
+  ): Promise<PathJourney[]> {
     return await this.httpClient.getPathJourneys(pathId, page, perPage);
   }
 
@@ -24,7 +32,11 @@ export class NationBuilderClient {
     return await this.httpClient.getPathBySlug(slug);
   }
 
-  async addPersonToPath(personId: string, pathId: string, stepNumber: number): Promise<boolean> {
+  async addPersonToPath(
+    personId: string,
+    pathId: string,
+    stepNumber: number
+  ): Promise<boolean> {
     return await this.httpClient.addPersonToPath(personId, pathId, stepNumber);
   }
 }

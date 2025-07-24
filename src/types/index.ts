@@ -1,9 +1,9 @@
 export interface Person {
   id: string;
-  email?: string;
-  first_name?: string;
-  last_name?: string;
-  tags?: string[];
+  email: string;
+  first_name: string;
+  last_name: string;
+  tags: string[];
 }
 
 export interface PathJourney {
@@ -18,6 +18,7 @@ export interface Path {
   id: string;
   slug: string;
   name: string;
+  status: string;
 }
 
 export interface TagToPathMapping {
