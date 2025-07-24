@@ -143,4 +143,19 @@ export class HTTPNationBuilderClient {
       throw new Error(`Failed to get path with slug "${slug}": ${error}`);
     }
   }
+
+  async addPersonToPath(personId: string, pathId: string, stepNumber: number): Promise<boolean> {
+    if (this.config.simulationMode) {
+      console.log(`🔄 SIMULATION: Would add person ${personId} to path ${pathId} at step ${stepNumber}`);
+      return true;
+    }
+
+    try {
+      // TODO: Implement actual API call when ready
+      console.log(`🚀 LIVE MODE: Adding person ${personId} to path ${pathId} at step ${stepNumber}`);
+      throw new Error('Live path addition not yet implemented - use simulation mode');
+    } catch (error) {
+      throw new Error(`Failed to add person to path: ${error}`);
+    }
+  }
 }

@@ -58,9 +58,13 @@ export function loadConfig(): AppConfig {
     throw new Error('No tag mappings found. Please set NB_MAPPING_* environment variables.');
   }
   
+  // Default to simulation mode for safety
+  const simulationMode = process.env.SIMULATION_MODE !== 'false';
+  
   return {
     nationBuilderApiToken: process.env.NATIONBUILDER_API_TOKEN!,
     nationBuilderSlug: process.env.NATIONBUILDER_SLUG!,
     tagMappings,
+    simulationMode,
   };
 }

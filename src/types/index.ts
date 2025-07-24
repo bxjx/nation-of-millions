@@ -30,4 +30,5 @@ export interface AppConfig {
   nationBuilderApiToken: string;
   nationBuilderSlug: string;
   tagMappings: TagToPathMapping[];
+  simulationMode: boolean;
 }

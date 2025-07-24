@@ -23,4 +23,8 @@ export class NationBuilderClient {
   async getPathBySlug(slug: string): Promise<Path | null> {
     return await this.httpClient.getPathBySlug(slug);
   }
+
+  async addPersonToPath(personId: string, pathId: string, stepNumber: number): Promise<boolean> {
+    return await this.httpClient.addPersonToPath(personId, pathId, stepNumber);
+  }
 }

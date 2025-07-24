@@ -19,6 +19,7 @@ async function main(): Promise<void> {
     console.log('API Configuration:');
     console.log(`Base URL: https://${config.nationBuilderSlug}.nationbuilder.com`);
     console.log(`API Token: [hidden]`);
+    console.log(`Simulation Mode: ${config.simulationMode ? '🔄 ENABLED (safe)' : '🚀 DISABLED (live writes)'}`);
     console.log(`First tag mapping: ${config.tagMappings[0]?.sourceTag}`);
     
     // Test basic functionality
@@ -35,14 +36,26 @@ async function main(): Promise<void> {
     }
     
     console.log('\n=== Testing Full Tag Count ===');
+    let allTaggedPeople: any[] = [];
     if (firstMapping) {
       console.log(`Getting ALL people with tag: ${firstMapping.sourceTag}`);
-      const allTaggedPeople = await tagService.getAllPeopleWithTag(firstMapping.sourceTag);
+      allTaggedPeople = await tagService.getAllPeopleWithTag(firstMapping.sourceTag);
       console.log(`🎯 Total people with tag "${firstMapping.sourceTag}": ${allTaggedPeople.length}`);
       
       if (allTaggedPeople.length > 0) {
         console.log('✅ Person data structure verified (PII minimized)');
       }
+    }
+    
+    console.log('\n=== Testing Simulation Mode ===');
+    if (firstMapping && allTaggedPeople.length > 0) {
+      console.log('Testing path addition simulation...');
+      const testPersonId = allTaggedPeople[0]!.id;
+      const testPathId = 'example_path_123';
+      const testStepNumber = firstMapping.targetStepNumber;
+      
+      const success = await client.addPersonToPath(testPersonId, testPathId, testStepNumber);
+      console.log(`Simulation result: ${success ? '✅ Success' : '❌ Failed'}`);
     }
     
     console.log('\n=== Path Testing (Skipped) ===');
