@@ -1,1 +1,1 @@
-web: npm start
+web: echo "NationBuilder Tag-to-Path Automation - Use Heroku Scheduler to run: npm start"
