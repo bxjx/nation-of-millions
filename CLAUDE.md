@@ -134,8 +134,59 @@ tag_automations:
 
 ## Tech Stack & Hosting
 - **Language**: TypeScript + Node.js
-- **NationBuilder API**: spraypaint.js (official Graphiti client)
+- **NationBuilder API**: Custom HTTP client (v2 API)
 - **Scheduling**: Heroku Scheduler (hourly execution)
 - **Hosting**: Heroku (familiar platform)
 - **Database**: Heroku Postgres (when needed later)
 - **Job timeout**: 60 minutes max (matches hourly frequency)
+
+## Implementation Status & Findings
+
+### ✅ COMPLETED (as of current session):
+1. **Project setup** - TypeScript strict mode, ESLint, Prettier, Git
+2. **Environment config** - Updated format: `NB_MAPPING_X=tag_name|path_slug|step_number`
+3. **NationBuilder v2 API integration** - Working HTTP client
+4. **Tag querying** - Fully functional, tested with live data
+
+### 🔍 KEY API DISCOVERIES:
+- **NationBuilder v2 API exists** but uses different endpoints than initially expected
+- **No `/people` endpoint** in v2 - uses `/signups` instead
+- **Working v2 endpoints confirmed**:
+  - `/api/v2/signup_tags` - Get tags by name
+  - `/api/v2/signups?filter[tag_id]=X` - Get people with specific tag
+  - `/api/v2/path_journeys?filter[path_id]=X` - Get people on paths (confirmed via curl)
+- **spraypaint.js issues** - Had undefined endpoint problems, switched to custom HTTP client
+- **Authentication works** with `Bearer {token}` in v2 API
+
+### 🏗️ CURRENT ARCHITECTURE:
+- **HTTPNationBuilderClient** (`src/services/httpClient.ts`) - Direct v2 API calls
+- **NationBuilderClient** (`src/services/nationbuilder.ts`) - Wrapper interface
+- **TagService** - Handles tag-to-people lookup with pagination
+- **PathService** - Placeholder for path membership (needs v2 implementation)
+
+### 🔒 DATA MINIMIZATION & SECURITY:
+- API tokens hidden in logs
+- Personal data (names, emails) masked as `[hidden]` in development output
+- Only functional data (counts, IDs) displayed
+- **IMPORTANT**: No actual user data, tag names, or counts should be committed to git
+- Scrub sensitive information from commit messages and documentation
+
+### ⏭️ NEXT STEPS:
+1. **Implement path membership querying** for v2 API
+2. **Test path_journeys endpoint** filtering 
+3. **Create local filtering logic** to find people needing to be added
+4. **Implement adding people to paths** functionality
+5. **Complete automation engine**
+
+### 📝 ENVIRONMENT SETUP:
+```bash
+# Example .env format (confirmed working):
+NATIONBUILDER_API_TOKEN=your_token_here
+NATIONBUILDER_SLUG=your_nation_slug
+NB_MAPPING_1=example_tag|volunteer_onboarding|2
+```
+
+### 🧪 TESTING COMMANDS:
+- `npm run dev` - Run main test script
+- `npx tsx src/test-simple.ts` - Direct API testing
+- Tag querying functionality verified with live data
