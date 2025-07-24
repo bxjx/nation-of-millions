@@ -73,17 +73,27 @@ export class AutomationService {
       console.log(`✅ Found path: "${targetPath.name}" (ID: ${targetPath.id})`);
 
       // Step 2.5: Validate the target step number
-      console.log(`Step 2.5: Validating step ${mapping.targetStepNumber} exists in path`);
+      console.log(
+        `Step 2.5: Validating step ${mapping.targetStepNumber} exists in path`
+      );
       const pathSteps = await this.client.getPathSteps(targetPath.id);
-      const targetStep = pathSteps.find(step => step.step_number === mapping.targetStepNumber);
-      
+      const targetStep = pathSteps.find(
+        step => step.step_number === mapping.targetStepNumber
+      );
+
       if (!targetStep) {
-        const availableSteps = pathSteps.map(s => `${s.step_number} ("${s.name}")`).join(', ');
-        console.log(`❌ Step ${mapping.targetStepNumber} not found in path. Available steps: ${availableSteps}`);
+        const availableSteps = pathSteps
+          .map(s => `${s.step_number} ("${s.name}")`)
+          .join(', ');
+        console.log(
+          `❌ Step ${mapping.targetStepNumber} not found in path. Available steps: ${availableSteps}`
+        );
         return result;
       }
-      
-      console.log(`✅ Found target step: "${targetStep.name}" (step ${targetStep.step_number})`);
+
+      console.log(
+        `✅ Found target step: "${targetStep.name}" (step ${targetStep.step_number})`
+      );
 
       // Step 3: Get all people currently on the path
       console.log(

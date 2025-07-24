@@ -63,7 +63,10 @@ export class PathService {
     return await this.client.getPathSteps(pathId);
   }
 
-  async validateStepNumber(pathId: string, stepNumber: number): Promise<PathStep | null> {
+  async validateStepNumber(
+    pathId: string,
+    stepNumber: number
+  ): Promise<PathStep | null> {
     const steps = await this.getPathSteps(pathId);
     return steps.find(step => step.step_number === stepNumber) || null;
   }

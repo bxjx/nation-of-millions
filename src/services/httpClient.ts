@@ -1,4 +1,10 @@
-import type { AppConfig, Person, PathJourney, Path, PathStep } from '../types/index.js';
+import type {
+  AppConfig,
+  Person,
+  PathJourney,
+  Path,
+  PathStep,
+} from '../types/index.js';
 
 interface APIResponse<T> {
   data: T[];
@@ -179,19 +185,21 @@ export class HTTPNationBuilderClient {
 
       // eslint-disable-next-line no-constant-condition
       while (true) {
-        const response = await this.apiCall<PathData>(`/paths?page[number]=${page}&page[size]=${perPage}`);
-        
+        const response = await this.apiCall<PathData>(
+          `/paths?page[number]=${page}&page[size]=${perPage}`
+        );
+
         if (response.data.length === 0) break;
-        
+
         const paths = response.data.map(path => ({
           id: path.id,
           name: path.attributes.name,
           slug: path.attributes.name.toLowerCase().replace(/\s+/g, '-'),
           status: 'active',
         }));
-        
+
         allPaths.push(...paths);
-        
+
         // If we got less than perPage, we're on the last page
         if (response.data.length < perPage) break;
         page++;
@@ -214,7 +222,9 @@ export class HTTPNationBuilderClient {
 
   async getPathSteps(pathId: string): Promise<PathStep[]> {
     try {
-      const response = await this.apiCall<PathStepData>(`/path_steps?filter[path_id]=${pathId}`);
+      const response = await this.apiCall<PathStepData>(
+        `/path_steps?filter[path_id]=${pathId}`
+      );
       return response.data.map(step => ({
         id: step.id,
         name: step.attributes.name,
@@ -222,7 +232,9 @@ export class HTTPNationBuilderClient {
         path_id: step.attributes.path_id,
       }));
     } catch (error) {
-      throw new Error(`Failed to get path steps for path "${pathId}": ${error}`);
+      throw new Error(
+        `Failed to get path steps for path "${pathId}": ${error}`
+      );
     }
   }
 
@@ -245,13 +257,19 @@ export class HTTPNationBuilderClient {
 
       // First, get the path steps to find the correct step ID
       const pathSteps = await this.getPathSteps(pathId);
-      const targetStep = pathSteps.find(step => step.step_number === stepNumber);
-      
+      const targetStep = pathSteps.find(
+        step => step.step_number === stepNumber
+      );
+
       if (!targetStep) {
-        throw new Error(`Step ${stepNumber} not found in path ${pathId}. Available steps: ${pathSteps.map(s => s.step_number).join(', ')}`);
+        throw new Error(
+          `Step ${stepNumber} not found in path ${pathId}. Available steps: ${pathSteps.map(s => s.step_number).join(', ')}`
+        );
       }
 
-      console.log(`Found target step: "${targetStep.name}" (ID: ${targetStep.id})`);
+      console.log(
+        `Found target step: "${targetStep.name}" (ID: ${targetStep.id})`
+      );
 
       // Create the path journey via POST to /path_journeys
       // Based on existing path journey structure: signup_id, path_id, and current_step_id are in attributes
@@ -262,8 +280,8 @@ export class HTTPNationBuilderClient {
             signup_id: personId,
             path_id: pathId,
             current_step_id: targetStep.id,
-          }
-        }
+          },
+        },
       };
 
       const url = `${this.baseUrl}/path_journeys`;
@@ -287,9 +305,11 @@ export class HTTPNationBuilderClient {
         );
       }
 
-      const result = await response.json() as { data?: { id?: string } };
-      console.log(`✅ Successfully created path journey (ID: ${result.data?.id || 'unknown'})`);
-      
+      const result = (await response.json()) as { data?: { id?: string } };
+      console.log(
+        `✅ Successfully created path journey (ID: ${result.data?.id || 'unknown'})`
+      );
+
       return true;
     } catch (error) {
       throw new Error(`Failed to add person to path: ${error}`);
