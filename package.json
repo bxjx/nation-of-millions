@@ -17,7 +17,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,json}\"",
     "prestart": "npm run build",
-    "heroku-prebuild": "npm run lint && npm run type-check",
+    "heroku-prebuild": "echo 'Skipping linting in production - already validated by pre-commit hooks'",
     "test": "jest",
     "prepare": "husky install"
   },
