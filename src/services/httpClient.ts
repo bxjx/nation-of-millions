@@ -1,4 +1,4 @@
-import type { AppConfig, Person, PathJourney, Path } from '../types/index.js';
+import type { AppConfig, Person, PathJourney, Path, PathStep } from '../types/index.js';
 
 interface APIResponse<T> {
   data: T[];
@@ -48,6 +48,20 @@ interface PathData {
     default_value_amount: string;
     due_date_is_enabled: boolean;
     value_amount_is_enabled: boolean;
+    created_at: string;
+    updated_at: string;
+  };
+}
+
+interface PathStepData {
+  id: string;
+  type: 'path_steps';
+  attributes: {
+    name: string;
+    position: number;
+    path_id: string;
+    default_due_date_interval: string;
+    default_point_person_id?: string;
     created_at: string;
     updated_at: string;
   };
@@ -159,13 +173,31 @@ export class HTTPNationBuilderClient {
 
   async getAllPaths(): Promise<Path[]> {
     try {
-      const response = await this.apiCall<PathData>('/paths');
-      return response.data.map(path => ({
-        id: path.id,
-        name: path.attributes.name,
-        slug: path.attributes.name.toLowerCase().replace(/\s+/g, '-'),
-        status: 'active',
-      }));
+      const allPaths: Path[] = [];
+      let page = 1;
+      const perPage = 100;
+
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const response = await this.apiCall<PathData>(`/paths?page[number]=${page}&page[size]=${perPage}`);
+        
+        if (response.data.length === 0) break;
+        
+        const paths = response.data.map(path => ({
+          id: path.id,
+          name: path.attributes.name,
+          slug: path.attributes.name.toLowerCase().replace(/\s+/g, '-'),
+          status: 'active',
+        }));
+        
+        allPaths.push(...paths);
+        
+        // If we got less than perPage, we're on the last page
+        if (response.data.length < perPage) break;
+        page++;
+      }
+
+      return allPaths;
     } catch (error) {
       throw new Error(`Failed to get all paths: ${error}`);
     }
@@ -177,6 +209,20 @@ export class HTTPNationBuilderClient {
       return allPaths.find(path => path.slug === slug) || null;
     } catch (error) {
       throw new Error(`Failed to get path with slug "${slug}": ${error}`);
+    }
+  }
+
+  async getPathSteps(pathId: string): Promise<PathStep[]> {
+    try {
+      const response = await this.apiCall<PathStepData>(`/path_steps?filter[path_id]=${pathId}`);
+      return response.data.map(step => ({
+        id: step.id,
+        name: step.attributes.name,
+        step_number: step.attributes.position,
+        path_id: step.attributes.path_id,
+      }));
+    } catch (error) {
+      throw new Error(`Failed to get path steps for path "${pathId}": ${error}`);
     }
   }
 
@@ -193,13 +239,58 @@ export class HTTPNationBuilderClient {
     }
 
     try {
-      // TODO: Implement actual API call when ready
       console.log(
         `🚀 LIVE MODE: Adding person ${personId} to path ${pathId} at step ${stepNumber}`
       );
-      throw new Error(
-        'Live path addition not yet implemented - use simulation mode'
-      );
+
+      // First, get the path steps to find the correct step ID
+      const pathSteps = await this.getPathSteps(pathId);
+      const targetStep = pathSteps.find(step => step.step_number === stepNumber);
+      
+      if (!targetStep) {
+        throw new Error(`Step ${stepNumber} not found in path ${pathId}. Available steps: ${pathSteps.map(s => s.step_number).join(', ')}`);
+      }
+
+      console.log(`Found target step: "${targetStep.name}" (ID: ${targetStep.id})`);
+
+      // Create the path journey via POST to /path_journeys
+      // Based on existing path journey structure: signup_id, path_id, and current_step_id are in attributes
+      const journeyData = {
+        data: {
+          type: 'path_journeys',
+          attributes: {
+            signup_id: personId,
+            path_id: pathId,
+            current_step_id: targetStep.id,
+          }
+        }
+      };
+
+      const url = `${this.baseUrl}/path_journeys`;
+      console.log(`API Call: POST ${url}`);
+      console.log(`Request body:`, JSON.stringify(journeyData, null, 2));
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.config.nationBuilderApiToken}`,
+          Accept: 'application/vnd.api+json',
+          'Content-Type': 'application/vnd.api+json',
+        },
+        body: JSON.stringify(journeyData),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `API call failed: ${response.status} ${response.statusText} - ${errorText}`
+        );
+      }
+
+      const result = await response.json() as { data?: { id?: string } };
+      console.log(`✅ Successfully created path journey (ID: ${result.data?.id || 'unknown'})`);
+      
+      return true;
     } catch (error) {
       throw new Error(`Failed to add person to path: ${error}`);
     }

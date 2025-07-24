@@ -1,5 +1,5 @@
 import type { HTTPNationBuilderClient } from './httpClient.js';
-import type { PathJourney, Path } from '../types/index.js';
+import type { PathJourney, Path, PathStep } from '../types/index.js';
 
 export class PathService {
   constructor(private client: HTTPNationBuilderClient) {}
@@ -57,5 +57,14 @@ export class PathService {
 
   async getAllPaths(): Promise<Path[]> {
     return await this.client.getAllPaths();
+  }
+
+  async getPathSteps(pathId: string): Promise<PathStep[]> {
+    return await this.client.getPathSteps(pathId);
+  }
+
+  async validateStepNumber(pathId: string, stepNumber: number): Promise<PathStep | null> {
+    const steps = await this.getPathSteps(pathId);
+    return steps.find(step => step.step_number === stepNumber) || null;
   }
 }

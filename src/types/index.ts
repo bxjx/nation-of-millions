@@ -21,6 +21,13 @@ export interface Path {
   status: string;
 }
 
+export interface PathStep {
+  id: string;
+  name: string;
+  step_number: number;
+  path_id: string;
+}
+
 export interface TagToPathMapping {
   sourceTag: string;
   targetPathSlug: string;
