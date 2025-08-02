@@ -1,4 +1,4 @@
-import type { HTTPNationBuilderClient } from './httpClient.js';
+import type { NationBuilderClient } from './nationbuilder.js';
 import type { TagToPathMapping, Person, Path } from '../types/index.js';
 
 export interface AutomationResult {
@@ -11,7 +11,7 @@ export interface AutomationResult {
 }
 
 export class AutomationService {
-  constructor(private client: HTTPNationBuilderClient) {}
+  constructor(private client: NationBuilderClient) {}
 
   async processMapping(mapping: TagToPathMapping): Promise<AutomationResult> {
     const result: AutomationResult = {

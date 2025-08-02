@@ -1,5 +1,5 @@
 import { loadConfig } from './config/index.js';
-import { HTTPNationBuilderClient } from './services/httpClient.js';
+import { NationBuilderClient } from './services/nationbuilder.js';
 import { AutomationService } from './services/automationService.js';
 
 async function main(): Promise<void> {
@@ -23,7 +23,8 @@ async function main(): Promise<void> {
     }
 
     // Initialize services
-    const client = new HTTPNationBuilderClient(config);
+    const client = new NationBuilderClient(config);
+    await client.initialize();
     const automationService = new AutomationService(client);
 
     // Run automation

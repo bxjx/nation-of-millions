@@ -8,6 +8,10 @@ export class NationBuilderClient {
     this.httpClient = new HTTPNationBuilderClient(config);
   }
 
+  async initialize(): Promise<void> {
+    await this.httpClient.initialize();
+  }
+
   async getPeopleWithTag(
     tag: string,
     page = 1,
@@ -38,5 +42,9 @@ export class NationBuilderClient {
     stepNumber: number
   ): Promise<boolean> {
     return await this.httpClient.addPersonToPath(personId, pathId, stepNumber);
+  }
+
+  async getPathSteps(pathId: string) {
+    return await this.httpClient.getPathSteps(pathId);
   }
 }

@@ -47,13 +47,27 @@ function parseTagMappings(): TagToPathMapping[] {
 }
 
 function validateRequiredEnvVars(): void {
-  const required = ['NATIONBUILDER_API_TOKEN', 'NATIONBUILDER_SLUG'];
+  const required = ['NATIONBUILDER_SLUG'];
   const missing = required.filter(key => !process.env[key]);
 
   if (missing.length > 0) {
     throw new Error(
       `Missing required environment variables: ${missing.join(', ')}`
     );
+  }
+
+  // Check for either OAuth refresh token or legacy API token
+  const hasOAuthToken = !!process.env.OAUTH_REFRESH_TOKEN;
+  const hasLegacyToken = !!process.env.NATIONBUILDER_API_TOKEN;
+
+  if (!hasOAuthToken && !hasLegacyToken) {
+    throw new Error(
+      'Missing authentication: Please set either OAUTH_REFRESH_TOKEN or NATIONBUILDER_API_TOKEN'
+    );
+  }
+
+  if (hasOAuthToken && hasLegacyToken) {
+    console.log('⚠️  Both OAuth and legacy tokens found. Using OAuth token.');
   }
 }
 
@@ -72,7 +86,8 @@ export function loadConfig(): AppConfig {
   const simulationMode = process.env.SIMULATION_MODE !== 'false';
 
   return {
-    nationBuilderApiToken: process.env.NATIONBUILDER_API_TOKEN!,
+    nationBuilderApiToken: process.env.NATIONBUILDER_API_TOKEN || null,
+    oauthRefreshToken: process.env.OAUTH_REFRESH_TOKEN || null,
     nationBuilderSlug: process.env.NATIONBUILDER_SLUG!,
     tagMappings,
     simulationMode,

@@ -35,7 +35,8 @@ export interface TagToPathMapping {
 }
 
 export interface AppConfig {
-  nationBuilderApiToken: string;
+  nationBuilderApiToken: string | null;
+  oauthRefreshToken: string | null;
   nationBuilderSlug: string;
   tagMappings: TagToPathMapping[];
   simulationMode: boolean;

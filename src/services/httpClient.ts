@@ -5,6 +5,7 @@ import type {
   Path,
   PathStep,
 } from '../types/index.js';
+import { TokenService } from './tokenService.js';
 
 interface APIResponse<T> {
   data: T[];
@@ -76,10 +77,35 @@ interface PathStepData {
 export class HTTPNationBuilderClient {
   private config: AppConfig;
   private baseUrl: string;
+  private tokenService: TokenService | null = null;
+  private accessToken: string | null = null;
 
   constructor(config: AppConfig) {
     this.config = config;
     this.baseUrl = `https://${config.nationBuilderSlug}.nationbuilder.com/api/v2`;
+
+    if (config.oauthRefreshToken) {
+      this.tokenService = new TokenService(config.nationBuilderSlug);
+    }
+  }
+
+  async initialize(): Promise<void> {
+    if (this.tokenService && this.config.oauthRefreshToken) {
+      console.log('🔐 Initializing OAuth access token...');
+      this.accessToken = await this.tokenService.getAccessToken(
+        this.config.oauthRefreshToken
+      );
+    }
+  }
+
+  private getAuthToken(): string {
+    if (this.accessToken) {
+      return this.accessToken;
+    }
+    if (this.config.nationBuilderApiToken) {
+      return this.config.nationBuilderApiToken;
+    }
+    throw new Error('No authentication token available');
   }
 
   private async apiCall<T>(endpoint: string): Promise<APIResponse<T>> {
@@ -88,7 +114,7 @@ export class HTTPNationBuilderClient {
 
     const response = await fetch(url, {
       headers: {
-        Authorization: `Bearer ${this.config.nationBuilderApiToken}`,
+        Authorization: `Bearer ${this.getAuthToken()}`,
         Accept: 'application/vnd.api+json',
         'Content-Type': 'application/vnd.api+json',
       },
@@ -291,7 +317,7 @@ export class HTTPNationBuilderClient {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${this.config.nationBuilderApiToken}`,
+          Authorization: `Bearer ${this.getAuthToken()}`,
           Accept: 'application/vnd.api+json',
           'Content-Type': 'application/vnd.api+json',
         },
