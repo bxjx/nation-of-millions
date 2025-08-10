@@ -38,10 +38,10 @@ interface PathJourneyData {
   id: string;
   type: 'path_journeys';
   attributes: {
-    person_id: string;
+    signup_id: string;
     path_id: string;
-    step_id: string;
-    step_number: number;
+    current_step_id: string;
+    journey_status: string;
   };
 }
 
@@ -84,17 +84,20 @@ export class HTTPNationBuilderClient {
     this.config = config;
     this.baseUrl = `https://${config.nationBuilderSlug}.nationbuilder.com/api/v2`;
 
-    if (config.oauthRefreshToken) {
-      this.tokenService = new TokenService(config.nationBuilderSlug);
+    if (config.oauthClientId && config.oauthClientSecret) {
+      this.tokenService = new TokenService(
+        config.nationBuilderSlug,
+        config.oauthClientId,
+        config.oauthClientSecret
+      );
     }
   }
 
   async initialize(): Promise<void> {
-    if (this.tokenService && this.config.oauthRefreshToken) {
+    if (this.tokenService) {
       console.log('🔐 Initializing OAuth access token...');
-      this.accessToken = await this.tokenService.getAccessToken(
-        this.config.oauthRefreshToken
-      );
+      await this.tokenService.initialize();
+      this.accessToken = await this.tokenService.getAccessToken();
     }
   }
 
@@ -191,10 +194,9 @@ export class HTTPNationBuilderClient {
 
       return response.data.map(journey => ({
         id: journey.id,
-        person_id: journey.attributes.person_id,
+        person_id: journey.attributes.signup_id, // API uses signup_id, not person_id
         path_id: journey.attributes.path_id,
-        step_id: journey.attributes.step_id,
-        step_number: journey.attributes.step_number,
+        step_id: journey.attributes.current_step_id, // API uses current_step_id
       }));
     } catch (error) {
       throw new Error(

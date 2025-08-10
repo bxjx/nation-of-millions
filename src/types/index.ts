@@ -11,7 +11,6 @@ export interface PathJourney {
   person_id: string;
   path_id: string;
   step_id: string;
-  step_number: number;
 }
 
 export interface Path {
@@ -36,7 +35,8 @@ export interface TagToPathMapping {
 
 export interface AppConfig {
   nationBuilderApiToken: string | null;
-  oauthRefreshToken: string | null;
+  oauthClientId: string | null;
+  oauthClientSecret: string | null;
   nationBuilderSlug: string;
   tagMappings: TagToPathMapping[];
   simulationMode: boolean;

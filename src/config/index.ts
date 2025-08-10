@@ -56,18 +56,22 @@ function validateRequiredEnvVars(): void {
     );
   }
 
-  // Check for either OAuth refresh token or legacy API token
-  const hasOAuthToken = !!process.env.OAUTH_REFRESH_TOKEN;
+  // Check for either OAuth client credentials or legacy API token
+  const hasOAuthCredentials = !!(
+    process.env.OAUTH_CLIENT_ID && process.env.OAUTH_CLIENT_SECRET
+  );
   const hasLegacyToken = !!process.env.NATIONBUILDER_API_TOKEN;
 
-  if (!hasOAuthToken && !hasLegacyToken) {
+  if (!hasOAuthCredentials && !hasLegacyToken) {
     throw new Error(
-      'Missing authentication: Please set either OAUTH_REFRESH_TOKEN or NATIONBUILDER_API_TOKEN'
+      'Missing authentication: Please set either (OAUTH_CLIENT_ID + OAUTH_CLIENT_SECRET) or NATIONBUILDER_API_TOKEN'
     );
   }
 
-  if (hasOAuthToken && hasLegacyToken) {
-    console.log('⚠️  Both OAuth and legacy tokens found. Using OAuth token.');
+  if (hasOAuthCredentials && hasLegacyToken) {
+    console.log(
+      '⚠️  Both OAuth and legacy tokens found. Using OAuth credentials.'
+    );
   }
 }
 
@@ -87,7 +91,8 @@ export function loadConfig(): AppConfig {
 
   return {
     nationBuilderApiToken: process.env.NATIONBUILDER_API_TOKEN || null,
-    oauthRefreshToken: process.env.OAUTH_REFRESH_TOKEN || null,
+    oauthClientId: process.env.OAUTH_CLIENT_ID || null,
+    oauthClientSecret: process.env.OAUTH_CLIENT_SECRET || null,
     nationBuilderSlug: process.env.NATIONBUILDER_SLUG!,
     tagMappings,
     simulationMode,

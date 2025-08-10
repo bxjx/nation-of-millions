@@ -19,16 +19,23 @@
     "prestart": "npm run build",
     "heroku-prebuild": "echo 'Skipping linting in production - already validated by pre-commit hooks'",
     "test": "jest",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "db:start": "docker-compose up -d postgres",
+    "db:stop": "docker-compose down",
+    "db:logs": "docker-compose logs -f postgres",
+    "oauth:setup": "npm run build && node scripts/get-oauth-tokens.js",
+    "oauth:save": "npm run build && node scripts/save-refresh-token.js"
   },
   "dependencies": {
     "@types/node": "^20.10.0",
     "dotenv": "^16.3.0",
+    "pg": "^8.16.3",
     "spraypaint": "^0.10.24",
     "typescript": "^5.3.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
+    "@types/pg": "^8.15.5",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
     "eslint": "^8.54.0",
