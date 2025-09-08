@@ -71,9 +71,9 @@ After evaluating webhooks vs polling, **scheduled polling was chosen** for simpl
 
 ### Environment Variables
 ```
-NB_TAG_volunteer=volunteer_onboarding:2
-NB_TAG_donor=donor_stewardship:1  
-NB_TAG_member=member_engagement:3
+NB_MAPPING_1=volunteer|Volunteer Onboarding|Welcome Email
+NB_MAPPING_2=donor|Donor Stewardship|Thank You Call  
+NB_MAPPING_3=member|Member Engagement|Orientation Meeting
 ```
 
 ### Database Schema (Future)
@@ -81,8 +81,8 @@ NB_TAG_member=member_engagement:3
 tag_automations:
 - id
 - source_tag
-- target_path_slug  
-- target_step_number
+- target_path_name  
+- target_step_name
 - active (boolean)
 - created_at
 - updated_at
@@ -125,6 +125,23 @@ tag_automations:
 - Standard Node.js/Express structure recommended
 - **Use spraypaint.js** - Official Graphiti TypeScript client for NationBuilder v2 API
 - **No official NationBuilder v2 npm package** exists (as of 2025)
+
+## Configuration Format
+
+### Mapping Environment Variables
+- **Format**: `NB_MAPPING_X=tag_name|path_name|step_name`
+- **Validation**: Exactly 2 pipe characters required
+- **No normalization**: All names used exactly as provided (any characters except pipe `|`)
+- **Examples**:
+  - `NB_MAPPING_1=volunteer|Volunteer Onboarding|Welcome Email`
+  - `NB_MAPPING_2=NYC Donor|Donor Stewardship Program|Thank You Call`
+  - `NB_MAPPING_3=event-attendee|Event Follow-up|Send Survey`
+
+### Key Changes from Previous Version
+- **Step Names Instead of Numbers**: Use actual step names from NationBuilder UI
+- **Path Names Instead of Slugs**: Use exact path names (easier to find in UI)
+- **No Normalization**: Names are matched exactly as they appear in NationBuilder
+- **Enhanced Validation**: Pipe character count validation prevents parsing errors
 
 ## Project-Specific Guidelines
 - **Always calculate API call optimization math upfront** when comparing approaches
@@ -183,7 +200,7 @@ tag_automations:
 # Example .env format (confirmed working):
 NATIONBUILDER_API_TOKEN=your_token_here
 NATIONBUILDER_SLUG=your_nation_slug
-NB_MAPPING_1=example_tag|volunteer_onboarding|2
+NB_MAPPING_1=example_tag|Volunteer Onboarding|Welcome Email
 ```
 
 ### 🧪 TESTING COMMANDS:

@@ -222,7 +222,6 @@ export class HTTPNationBuilderClient {
         const paths = response.data.map(path => ({
           id: path.id,
           name: path.attributes.name,
-          slug: path.attributes.name.toLowerCase().replace(/\s+/g, '-'),
           status: 'active',
         }));
 
@@ -239,12 +238,16 @@ export class HTTPNationBuilderClient {
     }
   }
 
-  async getPathBySlug(slug: string): Promise<Path | null> {
+  async getPathByName(pathName: string): Promise<Path | null> {
     try {
       const allPaths = await this.getAllPaths();
-      return allPaths.find(path => path.slug === slug) || null;
+
+      // Exact name match - no normalization
+      const foundPath = allPaths.find(path => path.name === pathName);
+
+      return foundPath || null;
     } catch (error) {
-      throw new Error(`Failed to get path with slug "${slug}": ${error}`);
+      throw new Error(`Failed to get path with name "${pathName}": ${error}`);
     }
   }
 
@@ -269,29 +272,27 @@ export class HTTPNationBuilderClient {
   async addPersonToPath(
     personId: string,
     pathId: string,
-    stepNumber: number
+    stepName: string
   ): Promise<boolean> {
     if (this.config.simulationMode) {
       console.log(
-        `🔄 SIMULATION: Would add person ${personId} to path ${pathId} at step ${stepNumber}`
+        `🔄 SIMULATION: Would add person ${personId} to path ${pathId} at step "${stepName}"`
       );
       return true;
     }
 
     try {
       console.log(
-        `🚀 LIVE MODE: Adding person ${personId} to path ${pathId} at step ${stepNumber}`
+        `🚀 LIVE MODE: Adding person ${personId} to path ${pathId} at step "${stepName}"`
       );
 
-      // First, get the path steps to find the correct step ID
+      // First, get the path steps to find the correct step ID by name
       const pathSteps = await this.getPathSteps(pathId);
-      const targetStep = pathSteps.find(
-        step => step.step_number === stepNumber
-      );
+      const targetStep = pathSteps.find(step => step.name === stepName);
 
       if (!targetStep) {
         throw new Error(
-          `Step ${stepNumber} not found in path ${pathId}. Available steps: ${pathSteps.map(s => s.step_number).join(', ')}`
+          `Step "${stepName}" not found in path ${pathId}. Available steps: ${pathSteps.map(s => `"${s.name}"`).join(', ')}`
         );
       }
 

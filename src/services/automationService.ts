@@ -25,7 +25,7 @@ export class AutomationService {
 
     try {
       console.log(
-        `\n🔄 Processing mapping: ${mapping.sourceTag} → ${mapping.targetPathSlug} (step ${mapping.targetStepNumber})`
+        `\n🔄 Processing mapping: ${mapping.sourceTag} → ${mapping.targetPathName} (step "${mapping.targetStepName}")`
       );
 
       // Step 1: Get all people with the source tag
@@ -59,40 +59,40 @@ export class AutomationService {
       }
 
       // Step 2: Find the target path
-      console.log(`Step 2: Looking up path "${mapping.targetPathSlug}"`);
-      const targetPath = await this.client.getPathBySlug(
-        mapping.targetPathSlug
+      console.log(`Step 2: Looking up path "${mapping.targetPathName}"`);
+      const targetPath = await this.client.getPathByName(
+        mapping.targetPathName
       );
 
       if (!targetPath) {
-        console.log(`❌ Path not found: "${mapping.targetPathSlug}"`);
+        console.log(`❌ Path not found: "${mapping.targetPathName}"`);
         return result;
       }
 
       result.targetPath = targetPath;
       console.log(`✅ Found path: "${targetPath.name}" (ID: ${targetPath.id})`);
 
-      // Step 2.5: Validate the target step number
+      // Step 2.5: Validate the target step name
       console.log(
-        `Step 2.5: Validating step ${mapping.targetStepNumber} exists in path`
+        `Step 2.5: Validating step "${mapping.targetStepName}" exists in path`
       );
       const pathSteps = await this.client.getPathSteps(targetPath.id);
       const targetStep = pathSteps.find(
-        step => step.step_number === mapping.targetStepNumber
+        step => step.name === mapping.targetStepName
       );
 
       if (!targetStep) {
         const availableSteps = pathSteps
-          .map(s => `${s.step_number} ("${s.name}")`)
+          .map(s => `"${s.name}" (position ${s.step_number})`)
           .join(', ');
         console.log(
-          `❌ Step ${mapping.targetStepNumber} not found in path. Available steps: ${availableSteps}`
+          `❌ Step "${mapping.targetStepName}" not found in path. Available steps: ${availableSteps}`
         );
         return result;
       }
 
       console.log(
-        `✅ Found target step: "${targetStep.name}" (step ${targetStep.step_number})`
+        `✅ Found target step: "${targetStep.name}" (position ${targetStep.step_number})`
       );
 
       // Step 3: Get all people currently on the path
@@ -140,7 +140,7 @@ export class AutomationService {
             const success = await this.client.addPersonToPath(
               person.id,
               targetPath.id,
-              mapping.targetStepNumber
+              mapping.targetStepName
             );
 
             result.additionResults.push({ person, success });
@@ -168,7 +168,7 @@ export class AutomationService {
       return result;
     } catch (error) {
       console.error(
-        `❌ Error processing mapping ${mapping.sourceTag} → ${mapping.targetPathSlug}:`,
+        `❌ Error processing mapping ${mapping.sourceTag} → ${mapping.targetPathName}:`,
         error
       );
       throw error;
@@ -195,7 +195,7 @@ export class AutomationService {
         }
       } catch (error) {
         console.error(
-          `Failed to process mapping ${mapping.sourceTag} → ${mapping.targetPathSlug}:`,
+          `Failed to process mapping ${mapping.sourceTag} → ${mapping.targetPathName}:`,
           error
         );
 
@@ -217,7 +217,7 @@ export class AutomationService {
       const failCount = result.additionResults.filter(r => !r.success).length;
 
       console.log(
-        `${index + 1}. ${result.mapping.sourceTag} → ${result.mapping.targetPathSlug}:`
+        `${index + 1}. ${result.mapping.sourceTag} → ${result.mapping.targetPathName}:`
       );
       console.log(`   Tagged people: ${result.taggedPeople.length}`);
       console.log(`   Already on path: ${result.peopleAlreadyOnPath.size}`);

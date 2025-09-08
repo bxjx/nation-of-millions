@@ -32,16 +32,16 @@ export class NationBuilderClient {
     return await this.httpClient.getAllPaths();
   }
 
-  async getPathBySlug(slug: string): Promise<Path | null> {
-    return await this.httpClient.getPathBySlug(slug);
+  async getPathByName(pathName: string): Promise<Path | null> {
+    return await this.httpClient.getPathByName(pathName);
   }
 
   async addPersonToPath(
     personId: string,
     pathId: string,
-    stepNumber: number
+    stepName: string
   ): Promise<boolean> {
-    return await this.httpClient.addPersonToPath(personId, pathId, stepNumber);
+    return await this.httpClient.addPersonToPath(personId, pathId, stepName);
   }
 
   async getPathSteps(pathId: string) {

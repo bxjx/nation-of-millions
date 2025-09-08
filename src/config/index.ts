@@ -11,34 +11,48 @@ function parseTagMappings(): TagToPathMapping[] {
   // Look for environment variables with pattern NB_MAPPING_*
   for (const [key, value] of Object.entries(process.env)) {
     if (key.startsWith('NB_MAPPING_') && value) {
-      // Parse format: "tag_name|path_slug|step_number"
+      // Validate pipe character count before splitting
+      const pipeCount = (value.match(/\|/g) || []).length;
+      if (pipeCount !== 2) {
+        throw new Error(
+          `Invalid tag mapping format for ${key}. Expected exactly 2 pipe characters (|), found ${pipeCount}. Format: "tag_name|path_name|step_name"`
+        );
+      }
+
+      // Parse format: "tag_name|path_name|step_name"
       const parts = value.split('|');
+
+      // This should always be 3 due to pipe count validation above, but double-check
       if (parts.length !== 3) {
         throw new Error(
-          `Invalid tag mapping format for ${key}. Expected "tag_name|path_slug|step_number", got "${value}"`
+          `Invalid tag mapping format for ${key}. Expected "tag_name|path_name|step_name", got "${value}"`
         );
       }
 
-      const [tagName, pathSlug, stepStr] = parts;
+      const [tagName, pathName, stepName] = parts as [string, string, string];
 
-      if (!tagName || !pathSlug || !stepStr) {
+      // Check for empty parts (but allow any characters except pipe)
+      if (!tagName || !pathName || !stepName) {
         throw new Error(
-          `Invalid tag mapping format for ${key}. All parts (tag|path|step) must be non-empty.`
+          `Invalid tag mapping format for ${key}. All parts (tag|path|step) must be non-empty. Got: tag="${tagName || 'empty'}", path="${pathName || 'empty'}", step="${stepName || 'empty'}"`
         );
       }
 
-      const stepNumber = parseInt(stepStr, 10);
-
-      if (isNaN(stepNumber) || stepNumber < 1) {
+      // Validate that none of the parts contain pipe characters (should be impossible due to split, but safety check)
+      if (
+        tagName.includes('|') ||
+        pathName.includes('|') ||
+        stepName.includes('|')
+      ) {
         throw new Error(
-          `Invalid step number for ${key}. Expected positive integer, got "${stepStr}"`
+          `Invalid tag mapping format for ${key}. Parts cannot contain pipe characters. Use a different separator if needed.`
         );
       }
 
       mappings.push({
         sourceTag: tagName,
-        targetPathSlug: pathSlug,
-        targetStepNumber: stepNumber,
+        targetPathName: pathName,
+        targetStepName: stepName,
       });
     }
   }

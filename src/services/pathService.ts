@@ -51,8 +51,8 @@ export class PathService {
     return new Set(journeys.map(journey => journey.person_id));
   }
 
-  async getPathBySlug(slug: string): Promise<Path | null> {
-    return await this.client.getPathBySlug(slug);
+  async getPathByName(pathName: string): Promise<Path | null> {
+    return await this.client.getPathByName(pathName);
   }
 
   async getAllPaths(): Promise<Path[]> {
@@ -69,5 +69,13 @@ export class PathService {
   ): Promise<PathStep | null> {
     const steps = await this.getPathSteps(pathId);
     return steps.find(step => step.step_number === stepNumber) || null;
+  }
+
+  async validateStepName(
+    pathId: string,
+    stepName: string
+  ): Promise<PathStep | null> {
+    const steps = await this.getPathSteps(pathId);
+    return steps.find(step => step.name === stepName) || null;
   }
 }

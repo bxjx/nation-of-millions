@@ -15,7 +15,6 @@ export interface PathJourney {
 
 export interface Path {
   id: string;
-  slug: string;
   name: string;
   status: string;
 }
@@ -29,8 +28,8 @@ export interface PathStep {
 
 export interface TagToPathMapping {
   sourceTag: string;
-  targetPathSlug: string;
-  targetStepNumber: number;
+  targetPathName: string;
+  targetStepName: string;
 }
 
 export interface AppConfig {
